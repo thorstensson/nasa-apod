@@ -17,8 +17,8 @@
           />
 
           <!-- Only 2 additional image slots for active and next textures -->
-          <img v-if="imageUrls.length > 0" :src="imageUrls[0]" crossorigin="anonymous" />
-          <img v-if="imageUrls.length > 1" :src="imageUrls[1]" crossorigin="anonymous" />
+          <img crossorigin="anonymous" />
+          <img crossorigin="anonymous" />
         </div>
 
         <!-- Navigation Buttons -->
@@ -228,35 +228,38 @@
   `
 
   const fragmentShader = `
-  precision mediump float;
+precision mediump float;
 
-  varying vec3 vVertexPosition;
-  varying vec2 vTextureCoord;
-  varying vec2 vActiveTextureCoord;
-  varying vec2 vNextTextureCoord;
+varying vec3 vVertexPosition;
+varying vec2 vTextureCoord;
+varying vec2 vActiveTextureCoord;
+varying vec2 vNextTextureCoord;
 
-  uniform float uTransitionTimer;
+uniform float uTransitionTimer;
 
-  uniform sampler2D activeTex;
-  uniform sampler2D nextTex;
-  uniform sampler2D displacement;
+uniform sampler2D activeTex;
+uniform sampler2D nextTex;
+uniform sampler2D displacement;
 
-  void main() {
-    vec4 displacementTexture = texture2D(displacement, vTextureCoord);
+void main() {
+  vec4 displacementTexture = texture2D(displacement, vTextureCoord);
 
-    vec2 firstDisplacementCoords = vActiveTextureCoord + displacementTexture.r * ((cos((uTransitionTimer + 90.0) / (90.0 / 3.141592)) + 1.0) / 1.25);
-    vec4 firstDistortedColor = texture2D(activeTex, vec2(vActiveTextureCoord.x, firstDisplacementCoords.y));
+  // Smooth displacement effect
+  vec2 firstDisplacementCoords = vActiveTextureCoord + displacementTexture.r * ((cos((uTransitionTimer + 90.0) / (90.0 / 3.141592)) + 1.0) / 1.25);
+  vec4 firstDistortedColor = texture2D(activeTex, vec2(vActiveTextureCoord.x, firstDisplacementCoords.y));
 
-    vec2 secondDisplacementCoords = vNextTextureCoord - displacementTexture.r * ((cos(uTransitionTimer / (90.0 / 3.141592)) + 1.0) / 1.25);
-    vec4 secondDistortedColor = texture2D(nextTex, vec2(vNextTextureCoord.x, secondDisplacementCoords.y));
+  vec2 secondDisplacementCoords = vNextTextureCoord - displacementTexture.r * ((cos(uTransitionTimer / (90.0 / 3.141592)) + 1.0) / 1.25);
+  vec4 secondDistortedColor = texture2D(nextTex, vec2(vNextTextureCoord.x, secondDisplacementCoords.y));
 
-    vec4 finalColor = mix(firstDistortedColor, secondDistortedColor, 1.0 - ((cos(uTransitionTimer / (90.0 / 3.141592)) + 1.0) / 2.0));
+  // Linear transition from 0.0 to 1.0 as uTransitionTimer goes from 0 to 90
+  float transition = clamp(uTransitionTimer / 90.0, 0.0, 1.0);
+  vec4 finalColor = mix(firstDistortedColor, secondDistortedColor, transition);
 
-    finalColor = vec4(finalColor.rgb * finalColor.a, finalColor.a);
+  finalColor = vec4(finalColor.rgb * finalColor.a, finalColor.a);
 
-    gl_FragColor = finalColor;
-  }
-  `
+  gl_FragColor = finalColor;
+}
+`
 
   const initSlideshow = () => {
     try {
@@ -328,6 +331,27 @@
           activeTexture.value = activeTex
           nextTexture.value = nextTex
 
+          // Load initial images if available
+          if (imageUrls.value.length > 0) {
+            const activeImg = new Image()
+            activeImg.crossOrigin = 'anonymous'
+            activeImg.src = imageUrls.value[0]
+            activeImg.onload = () => {
+              activeTex.setSource(activeImg)
+              console.log('Initial active image loaded')
+            }
+          }
+
+          if (imageUrls.value.length > 1) {
+            const nextImg = new Image()
+            nextImg.crossOrigin = 'anonymous'
+            nextImg.src = imageUrls.value[1]
+            nextImg.onload = () => {
+              nextTex.setSource(nextImg)
+              console.log('Initial next image loaded')
+            }
+          }
+
           console.log(
             'Textures created, activeTextureIndex:',
             slideshowState.value.activeTextureIndex
@@ -359,11 +383,6 @@
   const startTransition = (direction: 'next' | 'prev') => {
     if (!curtains.value || !multiTexturesPlane.value || slideshowState.value.isChanging) return
 
-    curtains.value.enableDrawing()
-    slideshowState.value.isChanging = true
-    isChanging.value = true
-    slideshowState.value.transitionTimer = 0
-
     const totalSlides = imageUrls.value.length
     let nextImageIndex
 
@@ -373,22 +392,32 @@
       nextImageIndex = (currentSlideIndex.value - 1 + totalSlides) % totalSlides
     }
 
-    if (nextTexture.value && imageUrls.value[nextImageIndex]) {
-      const nextImg = new Image()
-      nextImg.crossOrigin = 'anonymous'
-      nextImg.src = imageUrls.value[nextImageIndex]
-      console.log('Loading next image:', imageUrls.value[nextImageIndex])
-      nextImg.onload = () => {
-        console.log('Next image loaded successfully:', imageUrls.value[nextImageIndex])
-        nextTexture.value!.setSource(nextImg)
-      }
-      nextImg.onerror = (err) => {
-        console.error('Failed to load image:', imageUrls.value[nextImageIndex], err)
-      }
+    if (!nextTexture.value || !imageUrls.value[nextImageIndex]) return
 
+    console.log('Starting transition to image:', nextImageIndex, imageUrls.value[nextImageIndex])
+
+    // Preload the next image before starting transition
+    const nextImg = new Image()
+    nextImg.crossOrigin = 'anonymous'
+    nextImg.src = imageUrls.value[nextImageIndex]
+
+    nextImg.onload = () => {
+      console.log('Next image preloaded successfully, starting transition')
+
+      // Update the next texture with the preloaded image
+      nextTexture.value!.setSource(nextImg)
+
+      // Update UI state
       slideshowState.value.nextTextureIndex = nextImageIndex + 1
       currentSlideIndex.value = nextImageIndex
 
+      // Start the transition animation
+      curtains.value.enableDrawing()
+      slideshowState.value.isChanging = true
+      isChanging.value = true
+      slideshowState.value.transitionTimer = 0
+
+      // Complete the transition after animation
       setTimeout(() => {
         if (!curtains.value || !multiTexturesPlane.value) return
 
@@ -396,33 +425,25 @@
         slideshowState.value.isChanging = false
         isChanging.value = false
 
-        if (activeTexture.value && imageUrls.value[slideshowState.value.nextTextureIndex - 1]) {
+        // Swap textures: current becomes next, next becomes current
+        if (activeTexture.value) {
+          // Update active texture with the image that was just shown in nextTex
           const activeImg = new Image()
           activeImg.crossOrigin = 'anonymous'
-          activeImg.src = imageUrls.value[slideshowState.value.nextTextureIndex - 1]
-          console.log(
-            'Loading active image:',
-            imageUrls.value[slideshowState.value.nextTextureIndex - 1]
-          )
+          activeImg.src = imageUrls.value[nextImageIndex]
           activeImg.onload = () => {
-            console.log(
-              'Active image loaded successfully:',
-              imageUrls.value[slideshowState.value.nextTextureIndex - 1]
-            )
             activeTexture.value!.setSource(activeImg)
-          }
-          activeImg.onerror = (err) => {
-            console.error(
-              'Failed to load active image:',
-              imageUrls.value[slideshowState.value.nextTextureIndex - 1],
-              err
-            )
           }
         }
 
+        // Prepare for next transition
         slideshowState.value.activeTextureIndex = slideshowState.value.nextTextureIndex
         slideshowState.value.transitionTimer = 0
       }, 1700)
+    }
+
+    nextImg.onerror = (err) => {
+      console.error('Failed to preload image:', imageUrls.value[nextImageIndex], err)
     }
   }
 
