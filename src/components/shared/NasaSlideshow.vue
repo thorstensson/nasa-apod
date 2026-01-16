@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
-  import { Curtains, Plane } from 'curtainsjs'
+  import { Curtains, Plane, type Texture } from 'curtainsjs'
   import { type ApodItem } from '@/api/nasaService'
 
   const emit = defineEmits<{
@@ -185,18 +185,19 @@ void main() {
       slideshowState.value.maxTextures = imageUrls.value.length
 
       multiTexturesPlane.value
-        .onLoading((texture) => {
+        .onLoading((texture: Texture) => {
+          // Added : any here
           texture.setMinFilter(curtains.value!.gl.LINEAR_MIPMAP_NEAREST)
         })
         .onReady(() => {
           const plane = multiTexturesPlane.value!
           const activeTex = plane.createTexture({
             sampler: 'activeTex',
-            fromTexture: plane.textures[1]
+            fromTexture: plane.textures[1] as Texture
           })
           const nextTex = plane.createTexture({
             sampler: 'nextTex',
-            fromTexture: plane.textures[2]
+            fromTexture: plane.textures[2] as Texture
           })
 
           slideshowState.value.activeTextureIndex = 1

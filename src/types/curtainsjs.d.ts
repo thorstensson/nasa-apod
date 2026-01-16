@@ -1,44 +1,56 @@
 declare module 'curtainsjs' {
   export class Curtains {
     constructor(options: {
-      container: string;
-      watchScroll?: boolean;
-      pixelRatio?: number;
-      premultipliedAlpha?: boolean;
-      alpha?: boolean;
-      transparent?: boolean;
-    });
+      container: string
+      watchScroll?: boolean
+      pixelRatio?: number
+      premultipliedAlpha?: boolean
+      alpha?: boolean
+      transparent?: boolean
+    })
 
-    gl: WebGLRenderingContext;
+    gl: WebGLRenderingContext
 
-    onError(callback: () => void): this;
-    onContextLost(callback: () => void): this;
-    disableDrawing(): void;
-    enableDrawing(): void;
-    restoreContext(): void;
-    dispose(): void;
+    onError(callback: () => void): this
+    onContextLost(callback: () => void): this
+    disableDrawing(): void
+    enableDrawing(): void
+    restoreContext(): void
+    dispose(): void
+  }
+
+  // Define a simple Texture interface to replace 'any'
+  export interface Texture {
+    sampler: string
+    setSource(source: HTMLImageElement | HTMLCanvasElement | HTMLVideoElement): void
+    setMinFilter(filter: number): void
+    [key: string]: unknown
   }
 
   export class Plane {
-    constructor(curtains: Curtains, element: Element, params: {
-      vertexShader: string;
-      fragmentShader: string;
-      uniforms: Record<string, any>;
-      widthSegments?: number;
-      heightSegments?: number;
-    });
+    constructor(
+      curtains: Curtains,
+      element: Element,
+      params: {
+        vertexShader: string
+        fragmentShader: string
+        uniforms: Record<
+          string,
+          { name: string; type: string; value: number | number[] | Float32Array }
+        >
+        widthSegments?: number
+        heightSegments?: number
+      }
+    )
 
-    textures: any[];
-    images: any[];
-    uniforms: Record<string, { value: any }>;
+    textures: Texture[]
+    images: HTMLImageElement[]
+    uniforms: Record<string, { value: unknown }>
 
-    onLoading(callback: (texture: any) => void): this;
-    onReady(callback: () => void): this;
-    onRender(callback: () => void): this;
+    onLoading(callback: (texture: Texture) => void): this
+    onReady(callback: () => void): this
+    onRender(callback: () => void): this
 
-    createTexture(options: {
-      sampler: string;
-      fromTexture: any;
-    }): any;
+    createTexture(options: { sampler: string; fromTexture: Texture }): Texture
   }
 }
