@@ -1,33 +1,56 @@
 <template>
   <div class="min-h-screen" style="background-color: #050505">
-    <div v-if="isLoading" class="text-white text-center p-8">Loading NASA images...</div>
+    <LineLoader
+      v-if="showLoader"
+      @complete="handleLoaderComplete"
+      class="fixed inset-0 flex items-center justify-center z-50"
+    />
 
-    <div v-else-if="error" class="error text-red-400 text-center p-8">Error: {{ error }}</div>
+    <div v-if="!showLoader">
+      <div v-if="error" class="error text-red-400 text-center p-8">Error: {{ error }}</div>
 
-    <div v-else-if="filteredItems.length > 0">
-      <NasaSlideshow :apod-items="filteredItems" />
+      <div v-else-if="filteredItems.length > 0">
+        <NasaSlideshow :apod-items="filteredItems" />
+      </div>
+
+      <div v-else class="text-white text-center p-8">No images available</div>
     </div>
-
-    <div v-else class="text-white text-center p-8">No images available</div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { onMounted, computed } from 'vue'
+  import { onMounted, computed, ref, watch } from 'vue'
   import useNasaAPI from '@/composables/useNasaAPI'
   import NasaSlideshow from '@/components/shared/NasaSlideshow.vue'
+  import LineLoader from '@/components/shared/LineLoader.vue'
   import { type ApodItem } from '@/api/nasaService'
 
   const { loadGallery, gallery, isLoading, error, isVideo } = useNasaAPI()
+  const showLoader = ref(true)
+  const apiLoaded = ref(false)
+  const loaderAnimationComplete = ref(false)
 
   const filteredItems = computed(() => {
     return gallery.value.filter((item: ApodItem) => !isVideo(item))
   })
 
+  const handleLoaderComplete = () => {
+    loaderAnimationComplete.value = true
+    checkIfShouldHideLoader()
+  }
+
+  const checkIfShouldHideLoader = () => {
+    if (loaderAnimationComplete.value && apiLoaded.value) {
+      showLoader.value = false
+    }
+  }
+
   onMounted(async () => {
     try {
       console.log('Loading gallery with 40 images...')
       await loadGallery(40)
+      apiLoaded.value = true
+      checkIfShouldHideLoader()
 
       console.log('Gallery loaded:', {
         totalItems: gallery.value.length,
@@ -37,6 +60,8 @@
       })
     } catch (err) {
       console.error('Error loading gallery:', err)
+      apiLoaded.value = true
+      checkIfShouldHideLoader()
     }
   })
 </script>

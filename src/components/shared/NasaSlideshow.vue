@@ -1,5 +1,14 @@
 <template>
   <div class="slideshow-container fixed inset-0 w-screen h-screen overflow-hidden bg-black">
+    <!-- COSMOPIX Header -->
+    <div class="absolute top-0 left-0 z-40 p-6 sm:p-8">
+      <h1
+        class="text-white font-display font-bold tracking-wider text-xl sm:text-2xl md:text-3xl lg:text-4xl"
+      >
+        COSMOPIX
+      </h1>
+    </div>
+
     <!-- Centered container for image area and navigation -->
     <div class="absolute inset-0 flex items-center justify-center z-10">
       <div class="relative w-full max-w-[800px] h-full max-h-[800px]">
@@ -82,7 +91,7 @@
       <!-- Metadata Display -->
       <div
         v-if="currentMetadata"
-        class="absolute bottom-8 left-8 max-w-xs text-white bg-black/30 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:max-w-sm md:max-w-md"
+        class="absolute bottom-8 left-8 max-w-xs text-white bg-black/30 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:max-w-sm md:max-w-md font-sans"
       >
         <h3 class="font-bold text-base sm:text-lg mb-1 sm:mb-2 truncate">
           {{ currentMetadata.title }}

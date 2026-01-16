@@ -19,6 +19,8 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/orbitron": "^5.2.8",
     "@tailwindcss/vite": "^4.1.18",
     "curtainsjs": "^8.1.6",
     "pinia": "^3.0.4",
