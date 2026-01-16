@@ -1,6 +1,9 @@
+![Image](https://github.com/user-attachments/assets/f416ec1e-cb62-414b-9cdd-fa029977bad5)
+
 # Cosmopix
 
-A cinematic WebGL slideshow for NASA's Astronomy Picture of the Day (APOD) archive. This took some coffe to get right :coffee: :coffee: :coffee:
+A cinematic WebGL slideshow for NASA's Astronomy Picture of the Day (APOD) archive. This took some coffee to get right :coffee: :coffee: :coffee:
+Look to the stars, and you'll find yourself in a world of wonder.
 
 https://cosmopix.vercel.app/
 
