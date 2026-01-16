@@ -1,4 +1,19 @@
 {
   "buildCommand": "vite build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "devCommand": "vite dev",
+  "rewrites": [
+    {
+      "source": "/apod-images/:path*",
+      "destination": "https://apod.nasa.gov/:path*"
+    },
+    {
+      "source": "/api-nasa/:path*",
+      "destination": "https://images-api.nasa.gov/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
