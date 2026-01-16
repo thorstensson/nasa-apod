@@ -130,9 +130,7 @@
         <span class="text-white">ACCESSING</span> NASA APOD DATABASE
       </div>
       <div class="text-gray-400 text-xs font-mono">
-        <span class="text-gray-300">[</span>
-        <span class="text-white">40</span>
-        <span class="text-gray-300">] IMAGES QUEUED</span>
+        <span class="text-white">IMAGES QUEUED</span>
       </div>
       <div class="text-gray-500 text-xs font-mono mt-4">
         <span class="blink">▌</span> READY FOR COSMIC DISPLAY <span class="blink">▌</span>

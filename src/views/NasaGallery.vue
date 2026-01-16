@@ -12,7 +12,15 @@
   const isSlideshowReady = ref(false)
 
   const filteredItems = computed(() => {
-    return gallery.value.filter((item: ApodItem) => !isVideo(item))
+    return gallery.value.filter((item: ApodItem) => {
+      if (isVideo(item)) return false
+      // Also filter out GIF images
+      if (item.media_type === 'image') {
+        const url = item.url.toLowerCase()
+        return !url.endsWith('.gif')
+      }
+      return true
+    })
   })
 
   const handleLoaderComplete = () => {
