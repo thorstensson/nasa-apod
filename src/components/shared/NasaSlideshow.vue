@@ -452,8 +452,8 @@
 <template>
   <div class="slideshow-container fixed inset-0 w-screen h-screen overflow-hidden bg-black">
     <!-- COSMOPIX Header -->
-    <div class="absolute top-0 left-0 z-40 p-6 sm:p-8">
-      <h1 class="text-white font-display font-bold text-[clamp(2.8rem,5vw,4.5rem)]">COSMOPIX</h1>
+    <div class="absolute z-40 top-4 left-4 sm:top-8 sm:left-8">
+      <h1 class="text-white font-display font-bold text-[clamp(1.8rem,5vw,3.6rem)]">COSMOPIX</h1>
     </div>
 
     <!-- Centered container for image area and navigation -->
@@ -489,7 +489,7 @@
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-8 w-8 text-white"
+              class="h-8 w-8 max-sm:h-5 max-sm:w-5 text-white"
               viewBox="0 0 24 24"
               stroke="currentColor"
               fill="none"
@@ -511,7 +511,7 @@
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-8 w-8 text-white"
+              class="h-8 w-8 max-sm:h-5 max-sm:w-5 text-white"
               viewBox="0 0 24 24"
               stroke="currentColor"
               fill="none"
@@ -531,7 +531,7 @@
       <div class="fixed inset-0 pointer-events-none z-30">
         <!-- Slide Counter -->
         <div
-          class="absolute bottom-8 right-8 text-white bg-black/30 backdrop-blur-sm px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm"
+          class="absolute bottom-4 sm:bottom-8 right-8 text-white bg-black/30 backdrop-blur-sm px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm"
         >
           {{ currentSlideIndex + 1 }} / {{ imageUrls.length }}
         </div>
@@ -539,28 +539,36 @@
         <!-- Metadata Display -->
         <div
           v-if="currentMetadata"
-          class="absolute bottom-8 left-8 max-w-xs text-white bg-black/20 backdrop-blur-sm px-3 py-1 sm:px-4 sm:py-2 rounded-lg sm:max-w-sm md:max-w-md font-sans"
+          class="absolute bottom-4 sm:bottom-8 left-8 max-w-64 text-white bg-black/20 backdrop-blur-sm px-3 py-1 sm:px-4 sm:py-2 rounded-lg sm:max-w-sm md:max-w-md font-sans"
         >
-          <h3 class="font-bold text-base sm:text-lg mb-1 sm:mb-2 truncate">
+          <h3 class="font-bold text-base sm:text-md mb-1 sm:mb-2 truncate">
             {{ currentMetadata.title }}
           </h3>
-          <div class="text-xs sm:text-sm space-y-1">
+          <div class="text-base md:text-lg space-y-1">
             <div class="flex items-center gap-1 sm:gap-2 flex-wrap">
-              <span class="text-gray-300">Date:</span>
-              <span>{{ formatDate(currentMetadata.date) }}</span>
-              <span v-if="currentMetadata.copyright" class="text-gray-300 ml-2">•</span>
-              <span v-if="currentMetadata.copyright" class="text-gray-300">Copyright:</span>
-              <span v-if="currentMetadata.copyright" class="truncate">{{
-                currentMetadata.copyright
+              <span class="text-xs sm:text-xs md:text-sm text-gray-300">Date:</span>
+              <span class="text-xs sm:text-xs md:text-sm">{{
+                formatDate(currentMetadata.date)
               }}</span>
+              <span v-if="currentMetadata.copyright" class="text-gray-300 ml-2">•</span>
+              <span
+                v-if="currentMetadata.copyright"
+                class="text-gray-300 text-xs sm:text-xs md:text-sm"
+                >Copyright:</span
+              >
+              <span
+                v-if="currentMetadata.copyright"
+                class="text-xs sm:text-xs md:text-sm truncate"
+                >{{ currentMetadata.copyright }}</span
+              >
             </div>
             <div class="mt-2 hidden sm:block">
-              <p class="text-gray-300 text-xs mb-1">Explanation:</p>
-              <p class="text-xs sm:text-sm line-clamp-2 md:line-clamp-3">
+              <p class="text-gray-300 text-xs sm:text-xs md:text-sm mb-1">Explanation:</p>
+              <p class="text-xs sm:text-xs md:text-sm line-clamp-2 md:line-clamp-3">
                 {{ currentMetadata.explanation }}
               </p>
             </div>
-            <div class="mt-1 sm:mt-2 text-xs text-gray-400">
+            <div class="mt-1 sm:mt-2 text-xs md:text-sm text-gray-400">
               Media type: {{ currentMetadata.media_type }} • Service version:
               {{ currentMetadata.service_version }}
             </div>
