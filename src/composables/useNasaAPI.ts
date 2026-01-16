@@ -1,136 +1,69 @@
+import { computed } from 'vue'
 import { useNasaStore } from '@/stores/nasaStore'
-import { type NasaItem } from '@/api/nasaService'
+import { type ApodItem } from '@/api/nasaService'
 
 export default function useNasaAPI() {
   const nasaStore = useNasaStore()
 
   /**
-   * Search for NASA images using the NASA API
-   * This uses the service function and updates the store
-   * Composable layer (UI) > Store layer (Logic / State) > Service layer (Pure API)
+   * Fetches a single APOD for a specific date (YYYY-MM-DD)
+   * or today's image if no date is provided.
    */
-  const searchImages = async (query: string): Promise<NasaItem[]> => {
+  const loadToday = async (date?: string): Promise<void> => {
     try {
-      // Use the store's action which internally uses the service
-      await nasaStore.fetchNasaImages(query)
-      return nasaStore.nasaImages
+      await nasaStore.fetchToday(date)
     } catch (error) {
-      console.error('Error in useNasaAPI searchImages:', error)
-      throw error
+      console.error('Error in useNasaAPI loadToday:', error)
     }
   }
 
   /**
-   * Get Web-Optimized Image URL for Curtains.js
-   * Uses large quality for good balance of quality and performance
+   * Fetches a collection of random APOD images for a gallery view.
    */
-  const getHighResImage = async (nasaId: string): Promise<string> => {
+  const loadGallery = async (count: number = 10): Promise<void> => {
     try {
-      const response = await fetch(`https://images-api.nasa.gov/asset/${nasaId}`)
-      if (!response.ok) return ''
-
-      const data = await response.json()
-
-      // Get all links from manifest
-      const items = data.collection?.items || []
-      const links: string[] = items.map((item: { href: string }) => item.href)
-
-      // 1. Filter for web-compatible formats first (.jpg, .jpeg, .png, .webp)
-      const webCompatibleLinks = links.filter((url) => {
-        const lowerUrl = url.toLowerCase()
-        return (
-          lowerUrl.endsWith('.jpg') ||
-          lowerUrl.endsWith('.jpeg') ||
-          lowerUrl.endsWith('.png') ||
-          lowerUrl.endsWith('.webp')
-        )
-      })
-
-      // 2. Prioritize medium quality for web performance, then small, then others
-      const optimizedImage =
-        webCompatibleLinks.find((url) => url.includes('~medium')) ||
-        webCompatibleLinks.find((url) => url.includes('~small')) ||
-        webCompatibleLinks.find((url) => url.includes('~large')) ||
-        webCompatibleLinks.find((url) => url.includes('~orig')) ||
-        webCompatibleLinks[0] || // Fallback to the first available web-ready image
-        ''
-
-      // Debug logging to see what we found
-      console.log(`NASA ID ${nasaId}:`, {
-        totalLinks: links.length,
-        webCompatibleLinks: webCompatibleLinks.length,
-        selectedImage: optimizedImage,
-        allLinks: links
-      })
-
-      return optimizedImage
+      await nasaStore.fetchDailyImages(count)
     } catch (error) {
-      console.error('Error fetching NASA asset:', error)
-      return ''
+      console.error('Error in useNasaAPI loadGallery:', error)
     }
   }
 
   /**
-   * Get the current NASA images from the store
+   * Helper to determine the best display URL.
+   * APOD provides 'url' (standard) and 'hdurl' (high-res).
+   * @param forceHd - If true, prefers the high-definition source.
    */
-  const getNasaImages = (): NasaItem[] => {
-    return nasaStore.nasaImages
+  const getImageUrl = (item: ApodItem | null, forceHd: boolean = false): string => {
+    if (!item || item.media_type !== 'image') return ''
+    return forceHd && item.hdurl ? item.hdurl : item.url
   }
 
   /**
-   * Check if images are currently loading
+   * Helper for template logic to decide between <img> and <iframe>.
+   * APOD often returns YouTube or Vimeo links as the 'url'.
    */
-  const isLoading = (): boolean => {
-    return nasaStore.isLoading
-  }
-
-  /**
-   * Get any error from the store
-   */
-  const getError = (): string | null => {
-    return nasaStore.error
-  }
-
-  /**
-   * Check if there are any images in the store
-   */
-  const hasImages = (): boolean => {
-    return nasaStore.hasImages
-  }
-
-  /**
-   * Get the total number of images
-   */
-  const getTotalImages = (): number => {
-    return nasaStore.totalImages
-  }
-
-  /**
-   * Clear the current images and error from the store
-   */
-  const clearResults = (): void => {
-    nasaStore.nasaImages = []
-    nasaStore.error = null
+  const isVideo = (item: ApodItem | null): boolean => {
+    return item?.media_type === 'video'
   }
 
   return {
-    // Main search function
-    searchImages,
+    // Methods
+    loadToday,
+    loadGallery,
+    getImageUrl,
+    isVideo,
 
-    // High-res image function
-    getHighResImage,
+    // Reactive State (Computed from Store)
+    today: computed(() => nasaStore.currentApod),
+    gallery: computed(() => nasaStore.apods),
+    isLoading: computed(() => nasaStore.isLoading),
+    error: computed(() => nasaStore.error),
+    hasImages: computed(() => nasaStore.hasImages),
 
-    // State accessors
-    getNasaImages,
-    isLoading,
-    getError,
-    hasImages,
-    getTotalImages,
-
-    // Utility functions
-    clearResults,
-
-    // Direct store access (if needed)
-    nasaStore
+    // Utilities
+    clear: () => {
+      nasaStore.apods = []
+      nasaStore.error = null
+    }
   }
 }

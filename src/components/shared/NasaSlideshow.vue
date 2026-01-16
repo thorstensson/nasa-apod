@@ -1,66 +1,80 @@
 <template>
   <div class="slideshow-container fixed inset-0 w-screen h-screen overflow-hidden bg-black">
-    <!-- WebGL Canvas -->
-    <div id="canvas" class="absolute inset-0 w-full h-full z-10"></div>
+    <!-- Centered container for image area and navigation -->
+    <div class="absolute inset-0 flex items-center justify-center z-10">
+      <div class="relative w-full max-w-[800px] h-full max-h-[800px]">
+        <!-- WebGL Canvas -->
+        <div id="canvas" class="absolute inset-0 w-full h-full"></div>
 
-    <!-- Texture Definition -->
-    <div class="multi-textures absolute inset-0 w-full h-full z-20">
-      <!-- Displacement texture (uses first image) -->
-      <img
-        v-if="imageUrls.length > 0"
-        :src="imageUrls[0]"
-        data-sampler="displacement"
-        crossorigin="anonymous"
-        class="hidden"
-      />
+        <!-- Texture Definition -->
+        <div class="multi-textures absolute inset-0 w-full h-full pointer-events-none opacity-0">
+          <!-- Displacement texture (uses first image) -->
+          <img
+            v-if="imageUrls.length > 0"
+            :src="imageUrls[0]"
+            data-sampler="displacement"
+            crossorigin="anonymous"
+          />
 
-      <!-- Only 2 additional image slots for active and next textures -->
-      <img v-if="imageUrls.length > 0" :src="imageUrls[0]" crossorigin="anonymous" class="hidden" />
-      <img v-if="imageUrls.length > 1" :src="imageUrls[1]" crossorigin="anonymous" class="hidden" />
+          <!-- Only 2 additional image slots for active and next textures -->
+          <img v-if="imageUrls.length > 0" :src="imageUrls[0]" crossorigin="anonymous" />
+          <img v-if="imageUrls.length > 1" :src="imageUrls[1]" crossorigin="anonymous" />
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="slideshow-navigation absolute inset-0">
+          <!-- Previous Button -->
+          <button
+            @click="prevSlide"
+            :disabled="imageUrls.length <= 1 || isChanging"
+            class="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-auto bg-black/30 hover:bg-black/50 backdrop-blur-sm rounded-full p-3 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-8 w-8 text-white"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              fill="none"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+
+          <!-- Next Button -->
+          <button
+            @click="nextSlide"
+            :disabled="imageUrls.length <= 1 || isChanging"
+            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-auto bg-black/30 hover:bg-black/50 backdrop-blur-sm rounded-full p-3 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-8 w-8 text-white"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              fill="none"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <!-- Navigation -->
-    <div class="slideshow-navigation fixed inset-0 pointer-events-none z-30">
-      <!-- Previous Button -->
-      <button
-        @click="prevSlide"
-        :disabled="imageUrls.length <= 1 || isChanging"
-        class="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-auto bg-black/30 hover:bg-black/50 backdrop-blur-sm rounded-full p-3 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-8 w-8 text-white"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M15 19l-7-7 7-7"
-          />
-        </svg>
-      </button>
-
-      <!-- Next Button -->
-      <button
-        @click="nextSlide"
-        :disabled="imageUrls.length <= 1 || isChanging"
-        class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-auto bg-black/30 hover:bg-black/50 backdrop-blur-sm rounded-full p-3 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-8 w-8 text-white"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
-
+    <!-- Slide Counter and Metadata (outside centered container) -->
+    <div class="fixed inset-0 pointer-events-none z-30">
       <!-- Slide Counter -->
       <div
-        class="absolute bottom-8 right-8 text-white text-sm bg-black/30 backdrop-blur-sm px-4 py-2 rounded-full"
+        class="absolute bottom-8 right-8 text-white bg-black/30 backdrop-blur-sm px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm"
       >
         {{ currentSlideIndex + 1 }} / {{ imageUrls.length }}
       </div>
@@ -68,35 +82,32 @@
       <!-- Metadata Display -->
       <div
         v-if="currentMetadata"
-        class="absolute bottom-8 left-8 max-w-md text-white bg-black/30 backdrop-blur-sm p-4 rounded-lg"
+        class="absolute bottom-8 left-8 max-w-xs text-white bg-black/30 backdrop-blur-sm p-3 sm:p-4 rounded-lg sm:max-w-sm md:max-w-md"
       >
-        <h3 class="font-bold text-lg mb-2 truncate">{{ currentMetadata.title }}</h3>
-        <div class="text-sm space-y-1">
-          <div class="flex items-center gap-2">
-            <span class="text-gray-300">NASA ID:</span>
-            <span class="font-medium">{{ currentMetadata.nasa_id }}</span>
-          </div>
-          <div class="flex items-center gap-2">
+        <h3 class="font-bold text-base sm:text-lg mb-1 sm:mb-2 truncate">
+          {{ currentMetadata.title }}
+        </h3>
+        <div class="text-xs sm:text-sm space-y-1">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
             <span class="text-gray-300">Date:</span>
-            <span>{{ formatDate(currentMetadata.date_created) }}</span>
+            <span>{{ formatDate(currentMetadata.date) }}</span>
           </div>
-          <div class="flex items-center gap-2">
-            <span class="text-gray-300">Photographer:</span>
-            <span class="truncate">{{ currentMetadata.photographer }}</span>
+          <div
+            v-if="currentMetadata.copyright"
+            class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2"
+          >
+            <span class="text-gray-300">Copyright:</span>
+            <span class="truncate">{{ currentMetadata.copyright }}</span>
           </div>
-          <div v-if="currentMetadata.keywords && currentMetadata.keywords.length > 0" class="mt-2">
-            <div class="flex flex-wrap gap-1">
-              <span
-                v-for="keyword in currentMetadata.keywords.slice(0, 3)"
-                :key="keyword"
-                class="text-xs bg-white/20 px-2 py-1 rounded"
-              >
-                {{ keyword }}
-              </span>
-              <span v-if="currentMetadata.keywords.length > 3" class="text-xs text-gray-400">
-                +{{ currentMetadata.keywords.length - 3 }} more
-              </span>
-            </div>
+          <div class="mt-2">
+            <p class="text-gray-300 text-xs mb-1">Explanation:</p>
+            <p class="text-xs sm:text-sm line-clamp-2 md:line-clamp-3">
+              {{ currentMetadata.explanation }}
+            </p>
+          </div>
+          <div class="mt-1 sm:mt-2 text-xs text-gray-400">
+            Media type: {{ currentMetadata.media_type }} • Service version:
+            {{ currentMetadata.service_version }}
           </div>
         </div>
       </div>
@@ -104,40 +115,28 @@
   </div>
 </template>
 
-<!-- eslint-disable @typescript-eslint/no-explicit-any -->
-
 <script setup lang="ts">
   import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
   import { Curtains, Plane } from 'curtainsjs'
+  import { type ApodItem } from '@/api/nasaService'
 
-  // Props
   interface Props {
-    imageUrls: string[]
-    imageMetadata?: Array<{
-      title: string
-      nasa_id: string
-      date_created: string
-      description: string
-      photographer: string
-      keywords: string[]
-    }>
+    apodItems: ApodItem[]
+    useHd?: boolean
   }
 
   const props = withDefaults(defineProps<Props>(), {
-    imageMetadata: () => []
+    apodItems: () => [],
+    useHd: false
   })
 
-  // State
   const curtains = ref<Curtains | null>(null)
   const multiTexturesPlane = ref<Plane | null>(null)
   const currentSlideIndex = ref(0)
   const isChanging = ref(false)
-
-  // Texture references
   const activeTexture = ref<any | null>(null)
   const nextTexture = ref<any | null>(null)
 
-  // Slideshow state matching the Curtains.js example
   const slideshowState = ref({
     activeTextureIndex: 1,
     nextTextureIndex: 2,
@@ -146,9 +145,46 @@
     transitionTimer: 0
   })
 
-  // Format date for display
+  // Filter out videos and GIFs, only include non-GIF images
+  const imageItems = computed(() => {
+    return props.apodItems.filter((item) => {
+      if (item.media_type !== 'image') return false
+      // Also filter out GIF images
+      const url = item.url.toLowerCase()
+      return !url.endsWith('.gif')
+    })
+  })
+
+  const imageUrls = computed(() => {
+    const urls = imageItems.value.map((item) => {
+      const url = props.useHd && item.hdurl ? item.hdurl : item.url
+      // Use local Vite proxy for NASA APOD images to avoid CORS issues
+      if (url.includes('apod.nasa.gov')) {
+        return `/apod-images${url.replace('https://apod.nasa.gov', '')}`
+      }
+      return url
+    })
+
+    console.log('NASA Slideshow - Image URLs:', {
+      totalItems: props.apodItems.length,
+      imageItems: imageItems.value.length,
+      urls: urls,
+      sampleUrl: urls[0],
+      fileTypes: urls.map((url) => url.split('.').pop())
+    })
+
+    return urls
+  })
+
+  const currentMetadata = computed(() => {
+    if (imageItems.value.length > 0 && currentSlideIndex.value < imageItems.value.length) {
+      return imageItems.value[currentSlideIndex.value]
+    }
+    return null
+  })
+
   const formatDate = (dateString: string) => {
-    if (!dateString || dateString === 'Unknown date') return dateString
+    if (!dateString) return 'Unknown date'
     try {
       const date = new Date(dateString)
       return date.toLocaleDateString('en-US', {
@@ -161,91 +197,78 @@
     }
   }
 
-  // Computed property for current metadata
-  const currentMetadata = computed(() => {
-    if (props.imageMetadata.length > 0 && props.imageMetadata[currentSlideIndex.value]) {
-      return props.imageMetadata[currentSlideIndex.value]
-    }
-    return null
-  })
-
-  // Vertex shader from Curtains.js example
   const vertexShader = `
-precision mediump float;
+  precision mediump float;
 
-attribute vec3 aVertexPosition;
-attribute vec2 aTextureCoord;
+  attribute vec3 aVertexPosition;
+  attribute vec2 aTextureCoord;
 
-uniform mat4 uMVMatrix;
-uniform mat4 uPMatrix;
+  uniform mat4 uMVMatrix;
+  uniform mat4 uPMatrix;
 
-varying vec3 vVertexPosition;
-varying vec2 vTextureCoord;
-varying vec2 vActiveTextureCoord;
-varying vec2 vNextTextureCoord;
+  varying vec3 vVertexPosition;
+  varying vec2 vTextureCoord;
+  varying vec2 vActiveTextureCoord;
+  varying vec2 vNextTextureCoord;
 
-uniform mat4 activeTexMatrix;
-uniform mat4 nextTexMatrix;
+  uniform mat4 activeTexMatrix;
+  uniform mat4 nextTexMatrix;
 
-uniform float uTransitionTimer;
+  uniform float uTransitionTimer;
 
-void main() {
-  gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+  void main() {
+    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 
-  vTextureCoord = aTextureCoord;
-  vActiveTextureCoord = (activeTexMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;
-  vNextTextureCoord = (nextTexMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;
+    vTextureCoord = aTextureCoord;
+    vActiveTextureCoord = (activeTexMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;
+    vNextTextureCoord = (nextTexMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;
 
-  vVertexPosition = aVertexPosition;
-}
-`
+    vVertexPosition = aVertexPosition;
+  }
+  `
 
-  // Fragment shader from Curtains.js example
   const fragmentShader = `
-precision mediump float;
+  precision mediump float;
 
-varying vec3 vVertexPosition;
-varying vec2 vTextureCoord;
-varying vec2 vActiveTextureCoord;
-varying vec2 vNextTextureCoord;
+  varying vec3 vVertexPosition;
+  varying vec2 vTextureCoord;
+  varying vec2 vActiveTextureCoord;
+  varying vec2 vNextTextureCoord;
 
-uniform float uTransitionTimer;
+  uniform float uTransitionTimer;
 
-uniform sampler2D activeTex;
-uniform sampler2D nextTex;
-uniform sampler2D displacement;
+  uniform sampler2D activeTex;
+  uniform sampler2D nextTex;
+  uniform sampler2D displacement;
 
-void main() {
-  vec4 displacementTexture = texture2D(displacement, vTextureCoord);
+  void main() {
+    vec4 displacementTexture = texture2D(displacement, vTextureCoord);
 
-  vec2 firstDisplacementCoords = vActiveTextureCoord + displacementTexture.r * ((cos((uTransitionTimer + 90.0) / (90.0 / 3.141592)) + 1.0) / 1.25);
-  vec4 firstDistortedColor = texture2D(activeTex, vec2(vActiveTextureCoord.x, firstDisplacementCoords.y));
+    vec2 firstDisplacementCoords = vActiveTextureCoord + displacementTexture.r * ((cos((uTransitionTimer + 90.0) / (90.0 / 3.141592)) + 1.0) / 1.25);
+    vec4 firstDistortedColor = texture2D(activeTex, vec2(vActiveTextureCoord.x, firstDisplacementCoords.y));
 
-  vec2 secondDisplacementCoords = vNextTextureCoord - displacementTexture.r * ((cos(uTransitionTimer / (90.0 / 3.141592)) + 1.0) / 1.25);
-  vec4 secondDistortedColor = texture2D(nextTex, vec2(vNextTextureCoord.x, secondDisplacementCoords.y));
+    vec2 secondDisplacementCoords = vNextTextureCoord - displacementTexture.r * ((cos(uTransitionTimer / (90.0 / 3.141592)) + 1.0) / 1.25);
+    vec4 secondDistortedColor = texture2D(nextTex, vec2(vNextTextureCoord.x, secondDisplacementCoords.y));
 
-  vec4 finalColor = mix(firstDistortedColor, secondDistortedColor, 1.0 - ((cos(uTransitionTimer / (90.0 / 3.141592)) + 1.0) / 2.0));
+    vec4 finalColor = mix(firstDistortedColor, secondDistortedColor, 1.0 - ((cos(uTransitionTimer / (90.0 / 3.141592)) + 1.0) / 2.0));
 
-  finalColor = vec4(finalColor.rgb * finalColor.a, finalColor.a);
+    finalColor = vec4(finalColor.rgb * finalColor.a, finalColor.a);
 
-  gl_FragColor = finalColor;
-}
-`
+    gl_FragColor = finalColor;
+  }
+  `
 
-  // Initialize Curtains.js slideshow
   const initSlideshow = () => {
     try {
-      // Clean up existing instance
+      console.log('initSlideshow called, imageUrls:', imageUrls.value)
+
       if (curtains.value) {
         curtains.value.dispose()
         curtains.value = null
       }
 
-      // Set up WebGL context
       const canvasContainer = document.getElementById('canvas')
-      if (!canvasContainer) {
-        throw new Error('Canvas container not found')
-      }
+      if (!canvasContainer) return
 
       curtains.value = new Curtains({
         container: canvasContainer,
@@ -253,7 +276,6 @@ void main() {
         pixelRatio: Math.min(1.5, window.devicePixelRatio)
       })
 
-      // Handle errors
       curtains.value
         .onError(() => {
           document.body.classList.add('no-curtains', 'image-1')
@@ -262,10 +284,8 @@ void main() {
           curtains.value?.restoreContext()
         })
 
-      // Disable drawing initially
       curtains.value.disableDrawing()
 
-      // Setup plane parameters
       const params = {
         vertexShader,
         fragmentShader,
@@ -278,47 +298,42 @@ void main() {
         }
       }
 
-      // Get plane element
       const planeElement = document.querySelector('.multi-textures')
-      if (!planeElement) {
-        throw new Error('Plane element not found')
-      }
+      if (!planeElement) return
 
-      // Create plane
       multiTexturesPlane.value = new Plane(curtains.value, planeElement, params)
+      slideshowState.value.maxTextures = imageUrls.value.length
 
-      // Update max textures
-      slideshowState.value.maxTextures = props.imageUrls.length
+      console.log('Plane created, maxTextures:', slideshowState.value.maxTextures)
 
-      // Setup plane events
       multiTexturesPlane.value
         .onLoading((texture: any) => {
+          console.log('Texture loading:', texture)
           texture.setMinFilter(curtains.value!.gl.LINEAR_MIPMAP_NEAREST)
         })
         .onReady(() => {
+          console.log('Plane ready, creating textures')
           const plane = multiTexturesPlane.value!
-
-          // Create texture objects exactly like the original Curtains.js example
           const activeTex = plane.createTexture({
             sampler: 'activeTex',
             fromTexture: plane.textures[1]
           })
-
           const nextTex = plane.createTexture({
             sampler: 'nextTex',
             fromTexture: plane.textures[2]
           })
 
-          // Sync state for the first transition
           slideshowState.value.activeTextureIndex = 1
           slideshowState.value.nextTextureIndex = 2
-
-          // Store references to textures
           activeTexture.value = activeTex
           nextTexture.value = nextTex
+
+          console.log(
+            'Textures created, activeTextureIndex:',
+            slideshowState.value.activeTextureIndex
+          )
         })
         .onRender(() => {
-          // Update transition timer
           if (slideshowState.value.isChanging) {
             slideshowState.value.transitionTimer +=
               (90 - slideshowState.value.transitionTimer) * 0.04
@@ -331,7 +346,6 @@ void main() {
             }
           }
 
-          // Update uniform
           if (multiTexturesPlane.value && multiTexturesPlane.value.uniforms.transitionTimer) {
             multiTexturesPlane.value.uniforms.transitionTimer.value =
               slideshowState.value.transitionTimer
@@ -342,7 +356,6 @@ void main() {
     }
   }
 
-  // Start transition
   const startTransition = (direction: 'next' | 'prev') => {
     if (!curtains.value || !multiTexturesPlane.value || slideshowState.value.isChanging) return
 
@@ -351,8 +364,7 @@ void main() {
     isChanging.value = true
     slideshowState.value.transitionTimer = 0
 
-    // 1. Calculate the new target index
-    const totalSlides = props.imageUrls.length
+    const totalSlides = imageUrls.value.length
     let nextImageIndex
 
     if (direction === 'next') {
@@ -361,47 +373,61 @@ void main() {
       nextImageIndex = (currentSlideIndex.value - 1 + totalSlides) % totalSlides
     }
 
-    // 2. Load new image into next texture
-    if (nextTexture.value && props.imageUrls[nextImageIndex]) {
+    if (nextTexture.value && imageUrls.value[nextImageIndex]) {
       const nextImg = new Image()
       nextImg.crossOrigin = 'anonymous'
-      nextImg.src = props.imageUrls[nextImageIndex]
+      nextImg.src = imageUrls.value[nextImageIndex]
+      console.log('Loading next image:', imageUrls.value[nextImageIndex])
       nextImg.onload = () => {
+        console.log('Next image loaded successfully:', imageUrls.value[nextImageIndex])
         nextTexture.value!.setSource(nextImg)
       }
-    }
-
-    // 3. Update UI State
-    slideshowState.value.nextTextureIndex = nextImageIndex + 1 // +1 because index 0 is displacement
-    currentSlideIndex.value = nextImageIndex
-
-    // 4. Cleanup after animation
-    setTimeout(() => {
-      if (!curtains.value || !multiTexturesPlane.value) return
-
-      curtains.value.disableDrawing()
-
-      slideshowState.value.isChanging = false
-      isChanging.value = false
-
-      // Update active texture to the image that was just shown in nextTex
-      if (activeTexture.value && props.imageUrls[slideshowState.value.nextTextureIndex - 1]) {
-        const activeImg = new Image()
-        activeImg.crossOrigin = 'anonymous'
-        activeImg.src = props.imageUrls[slideshowState.value.nextTextureIndex - 1]
-        activeImg.onload = () => {
-          activeTexture.value!.setSource(activeImg)
-        }
+      nextImg.onerror = (err) => {
+        console.error('Failed to load image:', imageUrls.value[nextImageIndex], err)
       }
 
-      // Prepare for next transition
-      slideshowState.value.activeTextureIndex = slideshowState.value.nextTextureIndex
-      slideshowState.value.transitionTimer = 0
-    }, 1700)
+      slideshowState.value.nextTextureIndex = nextImageIndex + 1
+      currentSlideIndex.value = nextImageIndex
+
+      setTimeout(() => {
+        if (!curtains.value || !multiTexturesPlane.value) return
+
+        curtains.value.disableDrawing()
+        slideshowState.value.isChanging = false
+        isChanging.value = false
+
+        if (activeTexture.value && imageUrls.value[slideshowState.value.nextTextureIndex - 1]) {
+          const activeImg = new Image()
+          activeImg.crossOrigin = 'anonymous'
+          activeImg.src = imageUrls.value[slideshowState.value.nextTextureIndex - 1]
+          console.log(
+            'Loading active image:',
+            imageUrls.value[slideshowState.value.nextTextureIndex - 1]
+          )
+          activeImg.onload = () => {
+            console.log(
+              'Active image loaded successfully:',
+              imageUrls.value[slideshowState.value.nextTextureIndex - 1]
+            )
+            activeTexture.value!.setSource(activeImg)
+          }
+          activeImg.onerror = (err) => {
+            console.error(
+              'Failed to load active image:',
+              imageUrls.value[slideshowState.value.nextTextureIndex - 1],
+              err
+            )
+          }
+        }
+
+        slideshowState.value.activeTextureIndex = slideshowState.value.nextTextureIndex
+        slideshowState.value.transitionTimer = 0
+      }, 1700)
+    }
   }
 
-  // Navigation functions
   const nextSlide = () => {
+    console.log('NEXT')
     startTransition('next')
   }
 
@@ -409,25 +435,34 @@ void main() {
     startTransition('prev')
   }
 
-  // Lifecycle hooks
   onMounted(() => {
-    // Wait for next tick to ensure DOM is rendered
     setTimeout(() => {
-      if (props.imageUrls.length > 0) {
+      if (imageUrls.value.length > 0) {
         initSlideshow()
       }
     }, 100)
   })
 
-  // Watch for image URL changes
   watch(
-    () => props.imageUrls,
+    () => imageUrls.value,
     (newUrls) => {
       if (newUrls.length > 0) {
-        // Wait for next tick to ensure DOM is rendered
+        currentSlideIndex.value = 0
         setTimeout(() => {
           initSlideshow()
         }, 100)
+      }
+    },
+    { immediate: true }
+  )
+
+  // Watch for image URL changes and re-init if images load late
+  watch(
+    () => imageUrls.value,
+    (newUrls) => {
+      if (newUrls.length > 0 && !multiTexturesPlane.value) {
+        // Small timeout ensures Vue has rendered the <img> tags to the DOM
+        setTimeout(() => initSlideshow(), 100)
       }
     },
     { immediate: true }

@@ -1,55 +1,30 @@
-export interface NasaItemData {
-  nasa_id: string
+export interface ApodItem {
+  date: string
   title: string
-  description: string
-  date_created: string
-  center?: string
-  keywords?: string[]
+  explanation: string
+  url: string // Standard quality
+  hdurl?: string // High quality (optional, usually present for images)
+  media_type: string // 'image' or 'video'
+  copyright?: string
+  service_version: string
 }
 
-export interface NasaLink {
-  href: string // The direct image URL (thumbnail)
-  rel: string
-  render?: string
-}
+const BASE_URL = 'https://api.nasa.gov/planetary/apod'
+const API_KEY = import.meta.env.VITE_NASA_API_KEY
 
-export interface NasaItem {
-  href: string // The link to the asset manifest
-  data: NasaItemData[]
-  links: NasaLink[]
-}
-
-export interface NasaResponse {
-  collection: {
-    version: string
-    href: string
-    items: NasaItem[]
-    metadata: {
-      total_hits: number
-    }
-  }
-}
-
-const BASE_URL = 'https://images-api.nasa.gov/search'
-
-export const searchNasaImages = async (query: string): Promise<NasaItem[]> => {
+export const getApodImage = async (date?: string): Promise<ApodItem> => {
   const params = new URLSearchParams({
-    q: query,
-    media_type: 'image'
+    api_key: API_KEY,
+    ...(date && { date }) // Format: YYYY-MM-DD
   })
 
   try {
     const response = await fetch(`${BASE_URL}?${params.toString()}`)
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
 
-    // Extra safety check
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
-    const result: NasaResponse = await response.json()
-    return result.collection.items
+    return await response.json()
   } catch (error) {
-    console.error('Error fetching NASA data:', error)
+    console.error('Error fetching APOD data:', error)
     throw error
   }
 }

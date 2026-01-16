@@ -20,6 +20,11 @@ export default defineConfig({
         target: 'https://images-api.nasa.gov',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api-nasa/, '')
+      },
+      '/apod-images': {
+        target: 'https://apod.nasa.gov',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/apod-images/, '')
       }
     }
   }
