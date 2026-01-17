@@ -38,18 +38,14 @@
     <div class="space-y-1 text-base md:text-lg">
       <div class="flex flex-wrap items-center gap-1 sm:gap-2">
         <span class="text-xs text-gray-300">Date:</span>
-        <span class="text-sm">{{ formatDate(props.currentMetadata.date) }}</span>
-        <span v-if="props.currentMetadata.copyright" class="ml-2 text-gray-300">•</span>
-        <span
-          v-if="props.currentMetadata.copyright"
-          class="text-xs text-gray-300 sm:text-xs md:text-sm"
+        <span class="text-xs">{{ formatDate(props.currentMetadata.date) }}</span>
+        <span v-if="props.currentMetadata.copyright" class="ml-2 text-xs text-gray-300">•</span>
+        <span v-if="props.currentMetadata.copyright" class="text-xs text-gray-300 sm:text-xs"
           >Copyright:</span
         >
-        <span
-          v-if="props.currentMetadata.copyright"
-          class="truncate text-xs sm:text-xs md:text-sm"
-          >{{ props.currentMetadata.copyright }}</span
-        >
+        <span v-if="props.currentMetadata.copyright" class="truncate text-xs">{{
+          props.currentMetadata.copyright
+        }}</span>
       </div>
       <div class="mt-2 hidden sm:block">
         <p class="line-clamp-2 text-xs sm:text-xs md:line-clamp-5">

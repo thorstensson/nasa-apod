@@ -396,9 +396,9 @@
     () => currentMetadata.value,
     (newVal) => {
       if (newVal && newVal.title) {
-        document.title = `${newVal.title} | CosmoPix`
+        document.title = `${newVal.title} | APODS`
       } else {
-        document.title = 'CosmoPix - NASA Daily Photos'
+        document.title = 'APODS - NASA Daily'
       }
     },
     { immediate: true }
@@ -444,7 +444,7 @@
     <div class="absolute top-4 left-4 z-40 sm:left-8">
       <h1 class="font-display text-[clamp(1.8rem,5vw,3rem)] font-bold text-white">APODS</h1>
       <h4 class="font-sans text-xs text-white lg:text-sm">
-        NASA Photos of the Day API with Curtains.js.
+        NASA Photos of the Day API with Curtains.js
       </h4>
     </div>
 
