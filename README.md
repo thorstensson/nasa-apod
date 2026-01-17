@@ -1,6 +1,6 @@
-![Image](https://github.com/user-attachments/assets/f416ec1e-cb62-414b-9cdd-fa029977bad5)
+![Image](https://github.com/user-attachments/assets/86f75d43-8fe9-42ab-9d35-4f6ff71563d6)
 
-# Cosmopix
+# NASA APODS
 
 A cinematic WebGL slideshow for NASA's Astronomy Picture of the Day (APOD) archive. This took some coffee to get right :coffee: :coffee: :coffee:
 Look to the stars, we all need that more than the mobile :penguin:
