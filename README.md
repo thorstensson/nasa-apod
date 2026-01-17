@@ -3,9 +3,9 @@
 # Cosmopix
 
 A cinematic WebGL slideshow for NASA's Astronomy Picture of the Day (APOD) archive. This took some coffee to get right :coffee: :coffee: :coffee:
-Look to the stars, and you'll find yourself in a world of wonder.
+Look to the stars, we all need that more than the mobile :penguin:
 
-https://cosmopix.vercel.app/
+https://nasa-apods.vercel.app/
 
 ## Features
 
@@ -43,15 +43,30 @@ https://cosmopix.vercel.app/
 ```
 cosmopix/
 ├── src/
-│   ├── components/shared/     # Reusable components
-│   │   ├── NasaSlideshow.vue  # Main WebGL slideshow
-│   │   └── LineLoader.vue     # Futuristic loading animation
-│   ├── views/                 # Page components
-│   │   └── NasaGallery.vue    # Gallery view
-│   ├── stores/                # Pinia stores
-│   ├── api/                   # NASA service layer
-│   └── composables/           # Vue composables
-└── public/                    # Static assets
+│   ├── features/              # Feature-based modules
+│   │   └── nasa-slideshow/    # NASA slideshow feature
+│   │       ├── components/    # Feature-specific components
+│   │       ├── NasaSlideshow.vue  # Main WebGL slideshow component
+│   │       ├── nasaService.ts     # NASA API service
+│   │       ├── nasaStore.ts       # Pinia store for NASA data
+│   │       ├── useNasaAPI.ts      # Vue composable for NASA API
+│   │       ├── utils.ts           # Feature utilities
+│   │       └── curtainsjs.d.ts    # TypeScript definitions
+│   ├── shared/               # Shared resources
+│   │   ├── ui/              # Reusable UI components
+│   │   │   └── LineLoader.vue  # Futuristic loading animation
+│   │   ├── api/             # Shared API utilities
+│   │   └── utils/           # Shared utilities
+│   ├── views/               # Page components
+│   │   └── NasaGallery.vue  # Gallery view
+│   ├── layouts/             # Layout components
+│   ├── router/              # Vue Router configuration
+│   ├── assets/              # Static assets (CSS, images)
+│   ├── __tests__/           # Test files
+│   ├── App.vue              # Root component
+│   └── main.ts              # Application entry point
+├── public/                  # Public static assets
+└── package.json             # Dependencies and scripts
 ```
 
 ## Development

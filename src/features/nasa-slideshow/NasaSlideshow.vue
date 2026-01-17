@@ -442,9 +442,9 @@
   <div class="slideshow-container fixed inset-0 h-screen w-screen overflow-hidden bg-black">
     <!-- COSMOPIX Header -->
     <div class="absolute top-4 left-4 z-40 sm:left-8">
-      <h1 class="font-display text-[clamp(1.8rem,5vw,3rem)] font-bold text-white">APOD</h1>
+      <h1 class="font-display text-[clamp(1.8rem,5vw,3rem)] font-bold text-white">APODS</h1>
       <h4 class="font-sans text-xs text-white lg:text-sm">
-        Nasa Photo of the Day API with Curtains.js.
+        NASA Photos of the Day API with Curtains.js.
       </h4>
     </div>
 
