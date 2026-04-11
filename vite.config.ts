@@ -25,6 +25,12 @@ export default defineConfig({
         target: 'https://apod.nasa.gov',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/apod-images/, '')
+      },
+      // ADD THIS ONE FOR THE FALLBACK IMAGES
+      '/nasa-assets': {
+        target: 'https://images-assets.nasa.gov',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/nasa-assets/, '')
       }
     }
   }

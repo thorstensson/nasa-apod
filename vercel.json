@@ -4,6 +4,10 @@
   "devCommand": "vite dev",
   "rewrites": [
     {
+      "source": "/nasa-assets/:path*",
+      "destination": "https://images-assets.nasa.gov/:path*"
+    },
+    {
       "source": "/apod-images/:path*",
       "destination": "https://apod.nasa.gov/:path*"
     },

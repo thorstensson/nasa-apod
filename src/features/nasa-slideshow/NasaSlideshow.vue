@@ -73,70 +73,71 @@
    * @https://www.curtainsjs.com/examples/multiple-textures/index.html
    */
   const vertexShader = `
-    precision mediump float;
+     precision mediump float;
 
-    attribute vec3 aVertexPosition;
-    attribute vec2 aTextureCoord;
+     attribute vec3 aVertexPosition;
+     attribute vec2 aTextureCoord;
 
-    uniform mat4 uMVMatrix;
-    uniform mat4 uPMatrix;
+     uniform mat4 uMVMatrix;
+     uniform mat4 uPMatrix;
 
-    varying vec3 vVertexPosition;
-    varying vec2 vTextureCoord;
-    varying vec2 vActiveTextureCoord;
-    varying vec2 vNextTextureCoord;
+     varying vec3 vVertexPosition;
+     varying vec2 vTextureCoord;
+     varying vec2 vActiveTextureCoord;
+     varying vec2 vNextTextureCoord;
 
-    uniform mat4 activeTexMatrix;
-    uniform mat4 nextTexMatrix;
+     uniform mat4 activeTexMatrix;
+     uniform mat4 nextTexMatrix;
 
-    uniform float uTransitionTimer;
+     uniform float uTransitionTimer;
 
-    void main() {
-      gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+     void main() {
+       gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 
-      vTextureCoord = aTextureCoord;
-      vActiveTextureCoord = (activeTexMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;
-      vNextTextureCoord = (nextTexMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;
+       vTextureCoord = aTextureCoord;
+       vActiveTextureCoord = (activeTexMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;
+       vNextTextureCoord = (nextTexMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;
 
-      vVertexPosition = aVertexPosition;
-    }
-    `
+       vVertexPosition = aVertexPosition;
+     }
+     `
 
   const fragmentShader = `
-  precision mediump float;
+   precision mediump float;
 
-  varying vec3 vVertexPosition;
-  varying vec2 vTextureCoord;
-  varying vec2 vActiveTextureCoord;
-  varying vec2 vNextTextureCoord;
+   varying vec3 vVertexPosition;
+   varying vec2 vTextureCoord;
+   varying vec2 vActiveTextureCoord;
+   varying vec2 vNextTextureCoord;
 
-  uniform float uTransitionTimer;
+   uniform float uTransitionTimer;
 
-  uniform sampler2D activeTex;
-  uniform sampler2D nextTex;
-  uniform sampler2D displacement;
+   uniform sampler2D activeTex;
+   uniform sampler2D nextTex;
+   uniform sampler2D displacement;
 
-  void main() {
-    vec4 displacementTexture = texture2D(displacement, vTextureCoord);
+   void main() {
+     vec4 displacementTexture = texture2D(displacement, vTextureCoord);
 
-    // Smooth displacement effect
-    vec2 firstDisplacementCoords = vActiveTextureCoord + displacementTexture.r * ((cos((uTransitionTimer + 90.0) / (90.0 / 3.141592)) + 1.0) / 1.25);
-    vec4 firstDistortedColor = texture2D(activeTex, vec2(vActiveTextureCoord.x, firstDisplacementCoords.y));
+     // Smooth displacement effect
+     vec2 firstDisplacementCoords = vActiveTextureCoord + displacementTexture.r * ((cos((uTransitionTimer + 90.0) / (90.0 / 3.141592)) + 1.0) / 1.25);
+     vec4 firstDistortedColor = texture2D(activeTex, vec2(vActiveTextureCoord.x, firstDisplacementCoords.y));
 
-    vec2 secondDisplacementCoords = vNextTextureCoord - displacementTexture.r * ((cos(uTransitionTimer / (90.0 / 3.141592)) + 1.0) / 1.25);
-    vec4 secondDistortedColor = texture2D(nextTex, vec2(vNextTextureCoord.x, secondDisplacementCoords.y));
+     vec2 secondDisplacementCoords = vNextTextureCoord - displacementTexture.r * ((cos(uTransitionTimer / (90.0 / 3.141592)) + 1.0) / 1.25);
+     vec4 secondDistortedColor = texture2D(nextTex, vec2(vNextTextureCoord.x, secondDisplacementCoords.y));
 
-    // Linear transition from 0.0 to 1.0 as uTransitionTimer goes from 0 to 90
-    float transition = clamp(uTransitionTimer / 90.0, 0.0, 1.0);
-    vec4 finalColor = mix(firstDistortedColor, secondDistortedColor, transition);
+     // Linear transition from 0.0 to 1.0 as uTransitionTimer goes from 0 to 90
+     float transition = clamp(uTransitionTimer / 90.0, 0.0, 1.0);
+     vec4 finalColor = mix(firstDistortedColor, secondDistortedColor, transition);
 
-    finalColor = vec4(finalColor.rgb * finalColor.a, finalColor.a);
+     finalColor = vec4(finalColor.rgb * finalColor.a, finalColor.a);
 
-    gl_FragColor = finalColor;
-  }
-  `
+     gl_FragColor = finalColor;
+   }
+   `
 
   const initSlideshow = () => {
+    currentSlideIndex.value = 0
     if (isInitialized.value) return // Stop if already running
     isInitialized.value = true
     try {
@@ -162,7 +163,7 @@
           curtains.value?.restoreContext()
         })
 
-      curtains.value.disableDrawing()
+      //curtains.value.disableDrawing()
 
       const params = {
         vertexShader,
@@ -222,7 +223,10 @@
             activeImg.src = imageUrls.value[0]!
 
             activeImg.onload = () => {
-              activeTexture.value?.setSource(activeImg)
+              // Second try after delay
+              setTimeout(() => {
+                activeTexture.value?.setSource(activeImg)
+              }, 100)
               currentSlideIndex.value = 0 // Ensure Vue state matches
               emit('ready')
             }
@@ -288,52 +292,35 @@
     }
 
     function continueTransition() {
-      // Update the next texture with the preloaded image
+      // 1. Prepare next texture
       nextTexture.value!.setSource(nextImg!)
 
-      // Update UI state
-      slideshowState.value.nextTextureIndex = nextImageIndex! + 1
-      currentSlideIndex.value = nextImageIndex!
-
-      // Start the transition animation
-      curtains.value?.enableDrawing()
+      // 2. Start animation
       slideshowState.value.isChanging = true
       isChanging.value = true
       slideshowState.value.transitionTimer = 0
+      curtains.value?.enableDrawing()
 
-      // Complete the transition after animation
+      // 3. Sync cleanup exactly with animation completion
       setTimeout(() => {
         if (!curtains.value || !multiTexturesPlane.value) return
 
-        curtains.value.disableDrawing()
-        slideshowState.value.isChanging = false
-        isChanging.value = false
+        // CRITICAL SWAP ORDER:
+        // First, make the active texture show the NEW image
+        activeTexture.value!.setSource(nextImg!)
 
-        // Swap textures: current becomes next, next becomes current
-        if (activeTexture.value && imageUrls.value[nextImageIndex!]) {
-          const activeImageUrl = imageUrls.value[nextImageIndex!]
-          if (!activeImageUrl) return
-
-          // Check cache for active image
-          let activeImg = imageCache.value.get(activeImageUrl)
-          if (!activeImg) {
-            activeImg = new Image()
-            activeImg.crossOrigin = 'anonymous'
-            activeImg.src = activeImageUrl
-            activeImg.onload = () => {
-              imageCache.value.set(activeImageUrl, activeImg!)
-              activeTexture.value!.setSource(activeImg!)
-            }
-          } else {
-            activeTexture.value!.setSource(activeImg)
-          }
+        // Second, reset the timer to 0 so it shows that active texture
+        slideshowState.value.transitionTimer = 0
+        if (multiTexturesPlane.value.uniforms.transitionTimer) {
+          multiTexturesPlane.value.uniforms.transitionTimer.value = 0
         }
 
-        // Prepare for next transition
-        slideshowState.value.activeTextureIndex = slideshowState.value.nextTextureIndex
-        slideshowState.value.transitionTimer = 0
+        // Finally, stop the state
+        slideshowState.value.isChanging = false
+        isChanging.value = false
+        curtains.value.disableDrawing()
 
-        // Preload next images in background
+        currentSlideIndex.value = nextImageIndex!
         preloadNextImages(nextImageIndex!)
       }, 1700)
     }
@@ -383,12 +370,37 @@
   }
 
   onMounted(async () => {
-    await nextTick()
-    setTimeout(() => {
-      if (imageUrls.value.length > 0) {
-        initSlideshow()
+    // Add keyboard navigation for arrow keys
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Only handle arrow keys
+      if (event.key === 'ArrowRight') {
+        event.preventDefault()
+        if (!isChanging.value && imageUrls.value.length > 1) {
+          nextSlide()
+        }
+      } else if (event.key === 'ArrowLeft') {
+        event.preventDefault()
+        if (!isChanging.value && imageUrls.value.length > 1) {
+          prevSlide()
+        }
       }
-    }, 100)
+    }
+
+    // Add event listener
+    window.addEventListener('keydown', handleKeyDown)
+
+    // Store the handler for cleanup
+    const cleanup = () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+
+    // Clean up on unmount
+    onUnmounted(() => {
+      cleanup()
+      if (curtains.value) {
+        curtains.value.dispose()
+      }
+    })
   })
 
   // Inside your <script setup>
@@ -413,29 +425,13 @@
         isInitialized.value = false
         setTimeout(() => {
           initSlideshow()
-        }, 100)
+        }, 1500)
       }
     },
     { immediate: true }
   )
 
-  // Watch for image URL changes and re-init if images load late
-  watch(
-    () => imageUrls.value,
-    (newUrls) => {
-      if (newUrls.length > 0 && !multiTexturesPlane.value && !isInitialized.value) {
-        // Small timeout ensures Vue has rendered the <img> tags to the DOM
-        setTimeout(() => initSlideshow(), 100)
-      }
-    },
-    { immediate: true }
-  )
-
-  onUnmounted(() => {
-    if (curtains.value) {
-      curtains.value.dispose()
-    }
-  })
+  // onUnmounted is now inside onMounted for proper cleanup order
 </script>
 
 <template>
@@ -461,11 +457,19 @@
           <!-- Only 2 image slots for active and next textures -->
           <img
             crossorigin="anonymous"
+            data-sampler="displacement"
+            data-curtains-texture-helper
+            src="/src/assets/img/displacemap-2.jpg"
+          />
+          <img
+            crossorigin="anonymous"
+            data-sampler="activeTex"
             data-curtains-texture-helper
             src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
           />
           <img
             crossorigin="anonymous"
+            data-sampler="nextTex"
             data-curtains-texture-helper
             src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
           />
@@ -500,3 +504,13 @@
     </div>
   </div>
 </template>
+
+<style scoped>
+  #canvas {
+    width: 100%;
+    height: 100vh;
+    position: fixed; /* Common for full-page effects */
+    top: 0;
+    left: 0;
+  }
+</style>

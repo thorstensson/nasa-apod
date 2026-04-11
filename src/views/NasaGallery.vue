@@ -40,7 +40,7 @@
 
   onMounted(async () => {
     try {
-      await loadGallery(36)
+      await loadGallery(20)
       apiLoaded.value = true
       checkIfShouldHideLoader()
     } catch (err) {
@@ -74,5 +74,3 @@
     </div>
   </div>
 </template>
-
-<style scoped></style>

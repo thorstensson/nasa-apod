@@ -1,0 +1,65 @@
+NASA APOD PROJECT STRUCTURE DIAGRAM
+====================================
+
+nasa-apod/
+├── node_modules/ (dependencies)
+├── public/
+│   └── favicon.ico
+├── src/
+│   ├── __tests__/
+│   │   └── App.spec.ts
+│   ├── assets/
+│   │   └── css/
+│   │       └── main.css
+│   ├── features/
+│   │   └── nasa-slideshow/
+│   │       ├── components/
+│   │       │   ├── NasaMetadata.vue
+│   │       │   ├── NextButton.vue
+│   │       │   └── PreviousButton.vue
+│   │       ├── NasaSlideshow.vue
+│   │       ├── curtainsjs.d.ts
+│   │       ├── nasaService.ts
+│   │       ├── nasaStore.ts
+│   │       ├── useNasaAPI.ts
+│   │       └── utils.ts
+│   ├── layouts/ (empty)
+│   ├── router/
+│   │   └── index.ts
+│   ├── shared/
+│   │   ├── api/ (empty)
+│   │   ├── ui/
+│   │   │   └── LineLoader.vue
+│   │   └── utils/ (empty)
+│   ├── views/
+│   │   └── NasaGallery.vue
+│   ├── App.vue
+│   └── main.ts
+├── .editorconfig
+├── .gitattributes
+├── .gitignore
+├── .oxlintrc.json
+├── .prettierignore
+├── .prettierrc.json
+├── LICENSE
+├── README.md
+├── env.d.ts
+├── eslint.config.ts
+├── index.html
+├── package-lock.json
+├── package.json
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+├── tsconfig.vitest.json
+├── vercel.json
+├── vite.config.ts
+└── vitest.config.ts
+
+PROJECT TYPE: Vue.js 3 + TypeScript + Vite
+TEST FRAMEWORK: Vitest
+BUILD TOOL: Vite
+STYLING: CSS
+STATE MANAGEMENT: Pinia (nasaStore.ts)
+API INTEGRATION: NASA APOD API
+ROUTING: Vue Router
